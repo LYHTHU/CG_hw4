@@ -9,7 +9,7 @@ class Mat{
         this._mat = [];
         for(var i = 0; i < this.h; i++) {
             this._mat[i] = [];
-            for(var j = 0; i < this.w; i++) {
+            for(var j = 0; j < this.w; j++) {
                 this._mat[i][j] = v;            
             }            
         }
@@ -24,6 +24,46 @@ class Mat{
             return this._mat[i][j];
         }
     }
+
+    set(i, j, v) { 
+        if(i >= 0 && i < this.h && j >= 0 && j < this.w) {
+            this._mat[i][j] = v;
+        }
+    }
+
+    print() { 
+        var str = "";
+        for(var i = 0; i < this.h; i++) {
+            for(var j = 0; j < this.w; j++) {
+                str = str + this._mat[i][j] + " ";       
+            }
+            str += "\n";
+        }
+        console.log(str);
+    }
+
+    static fromVector(height, width, vector) {
+
+    }
+}
+
+function matmul(A, B) {
+    if(A.w != B.h) {
+        throw "Dimensions do not match!";
+    }
+
+    C = new Mat(A.h, B.w, 0.0);
+
+    for(var i = 0; i < A.h; ++i) {
+        for (var j = 0; j < B.w; ++j) {
+            var tmp = 0.0;
+            for (var k = 0; k < A.w; ++k) {
+                tmp += A.elem(i, k) * B.elem(k, j);
+            }
+            C.set(i, j, tmp);
+        }
+    }
+    return C;
 }
 
 
