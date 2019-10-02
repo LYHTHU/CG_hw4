@@ -93,7 +93,9 @@ async function setup(state) {
                     state.uShapesLoc[i].type = gl.getUniformLocation(program, 'uShapes[' + i + '].type');
                     state.uShapesLoc[i].n_p = gl.getUniformLocation(program, 'uShapes[' + i + '].n_p');
                     state.uShapesLoc[i].planeLoc = []
-                    for (var j = 0; j < 10; j++) {
+                    state.uShapesLoc[i].surfLoc = []
+                    for (var j = 0; j < 8; j++) {
+                        state.uShapesLoc[i].surfLoc[j] = gl.getUniformLocation(program, 'uShapes[' + i + '].surf[' + j + ']');
                         state.uShapesLoc[i].planeLoc[j] = gl.getUniformLocation(program, 'uShapes[' + i + '].plane[' + j + ']');
                     }
                 }
@@ -248,6 +250,7 @@ function onStartFrame(t, state) {
     gl.uniform1f (state.uShapesLoc[3].r, 0.3);
     gl.uniform1i (state.uShapesLoc[3].type, 1);
     gl.uniform1i (state.uShapesLoc[3].n_p, 6);
+
 
     gl.uniform4fv(state.uShapesLoc[3].planeLoc[0], [1. , 0., 0., -r]);
     gl.uniform4fv(state.uShapesLoc[3].planeLoc[1], [-1. , 0., 0., -r]);

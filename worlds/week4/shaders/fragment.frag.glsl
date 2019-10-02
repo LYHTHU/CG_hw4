@@ -16,9 +16,11 @@ struct Shape{
     int type;
     vec3 center;
     float r;
-
     int n_p;
-    vec4 plane[10];
+    vec4 plane[8];
+    mat4 surf[8];
+
+    mat4 transform;
 };
 
 
