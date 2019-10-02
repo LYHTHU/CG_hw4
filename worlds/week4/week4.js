@@ -48,6 +48,9 @@ class Mat{
     }
 
     static fromList(height, width, vector) {
+        if (vector.length != height * width) {
+            throw "Dimensions do not match!";
+        }
         ret = new Mat(height, width, 0.);
         for(var i = 0; i < height; i++) {
             for (var j = 0; j < width; j++) {
@@ -59,43 +62,47 @@ class Mat{
     }
 
     static diag(n, vector) {
+        if (vector.length != n) {
+            throw "Dimensions do not match!";
+        }
         ret = new Mat(n, n, 0.);
         for(var i = 0; i < n; i++) {
             ret.set(i, i, vector[i]);
         }
         return ret;
     }
-}
 
-function mat_mul(A, B) {
-    if(A.w != B.h) {
-        throw "Dimensions do not match!";
-    }
 
-    C = new Mat(A.h, B.w, 0.0);
+    static mat_add(A, B) {
+        if(A.w != B.w || A.h != B.h) {
+            throw "Dimensions do not match!";
+        }
 
-    for(var i = 0; i < A.h; ++i) {
-        for (var j = 0; j < B.w; ++j) {
-            var tmp = 0.0;
-            for (var k = 0; k < A.w; ++k) {
-                tmp += A.elem(i, k) * B.elem(k, j);
+        C = new Mat(A.h, B.w, 0.0);
+        for(var i = 0; i < A.h; ++i) {
+            for (var j = 0; j < B.w; ++j) {
+                C.set(i, j, A.elem(i, j) + B.elem(i, j));
             }
-            C.set(i, j, tmp);
         }
     }
-    return C;
-}
 
-function mat_add(A, B) {
-    if(A.w != B.w || A.h != B.h) {
-        throw "Dimensions do not match!";
-    }
-
-    C = new Mat(A.h, B.w, 0.0);
-    for(var i = 0; i < A.h; ++i) {
-        for (var j = 0; j < B.w; ++j) {
-            C.set(i, j, A.elem(i, j) + B.elem(i, j));
+    static mat_mul(A, B) {
+        if(A.w != B.h) {
+            throw "Dimensions do not match!";
         }
+    
+        C = new Mat(A.h, B.w, 0.0);
+    
+        for(var i = 0; i < A.h; ++i) {
+            for (var j = 0; j < B.w; ++j) {
+                var tmp = 0.0;
+                for (var k = 0; k < A.w; ++k) {
+                    tmp += A.elem(i, k) * B.elem(k, j);
+                }
+                C.set(i, j, tmp);
+            }
+        }
+        return C;
     }
 }
 
