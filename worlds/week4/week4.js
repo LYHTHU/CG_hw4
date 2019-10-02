@@ -144,7 +144,7 @@ class Mat{
     }
 
     static translate(x, y, z) {
-        let trans = mat.itentity();
+        let trans = Mat.identity();
         trans.set(0, 3, x);
         trans.set(1, 3, y);
         trans.set(2, 3, z);
@@ -152,11 +152,11 @@ class Mat{
     }
 
     static scale(x, y, z) {
-        return mat.diag(4, [x, y, z, 1]);
+        return Mat.diag(4, [x, y, z, 1]);
     }
 
     static perspective(x, y, z, w) {
-        let trans = mat.itentity();
+        let trans = Mat.identity();
         trans.set(3, 0, x);
         trans.set(3, 1, y);
         trans.set(3, 2, z);
@@ -164,7 +164,7 @@ class Mat{
         return trans;
     }
 
-    static rorateX(th) {
+    static rotateX(th) {
         var c = Math.cos(th);
         var s = Math.sin(th);
 
@@ -174,7 +174,7 @@ class Mat{
         return trans;
     }
 
-    static rorateY(th) {
+    static rotateY(th) {
         var c = Math.cos(th);
         var s = Math.sin(th);
 
@@ -184,7 +184,7 @@ class Mat{
         return trans;
     }
 
-    static rorateZ(th) {
+    static rotateZ(th) {
         var c = Math.cos(th);
         var s = Math.sin(th);
 
