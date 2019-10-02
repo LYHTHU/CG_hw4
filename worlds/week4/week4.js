@@ -42,12 +42,32 @@ class Mat{
         console.log(str);
     }
 
-    static fromVector(height, width, vector) {
+    toList() {
+        ret = [].concat(...this._mat);
+        return ret;
+    }
 
+    static fromList(height, width, vector) {
+        ret = new Mat(height, width, 0.);
+        for(var i = 0; i < height; i++) {
+            for (var j = 0; j < width; j++) {
+                var idx = i*width + j;
+                ret.set(i, j, vector[idx]);
+            }
+        }
+        return ret;
+    }
+
+    static diag(n, vector) {
+        ret = new Mat(n, n, 0.);
+        for(var i = 0; i < n; i++) {
+            ret.set(i, i, vector[i]);
+        }
+        return ret;
     }
 }
 
-function matmul(A, B) {
+function mat_mul(A, B) {
     if(A.w != B.h) {
         throw "Dimensions do not match!";
     }
@@ -64,6 +84,19 @@ function matmul(A, B) {
         }
     }
     return C;
+}
+
+function mat_add(A, B) {
+    if(A.w != B.w || A.h != B.h) {
+        throw "Dimensions do not match!";
+    }
+
+    C = new Mat(A.h, B.w, 0.0);
+    for(var i = 0; i < A.h; ++i) {
+        for (var j = 0; j < B.w; ++j) {
+            C.set(i, j, A.elem(i, j) + B.elem(i, j));
+        }
+    }
 }
 
 
