@@ -31,6 +31,20 @@ class Mat{
         }
     }
 
+    transpose() { 
+        let ret = new Mat(this.w, this.h, 0.0);
+        for (var i = 0; i < this.h; i++) {
+            for(var j = 0; j < this.w; j++) {
+                ret.set(j, i, this.elem(i, j));
+            }
+        }
+        return ret;
+    }
+
+    t() { 
+        return this.transpose();
+    }
+
     print() { 
         var str = "";
         for(var i = 0; i < this.h; i++) {
@@ -42,19 +56,27 @@ class Mat{
         console.log(str);
     }
 
+    // col by col
     toList() {
-        ret = [].concat(...this._mat);
+        var ret = [];
+        for(var j = 0; j < this.w; j++) {
+            for (var i = 0; i < this.h; i++) {
+                var idx = j*this.h + i;
+                ret[idx] = this.elem(i, j);
+            }
+        }
         return ret;
     }
 
+    // col by col
     static fromList(height, width, vector) {
         if (vector.length != height * width) {
             throw "Dimensions do not match!";
         }
-        ret = new Mat(height, width, 0.);
+        let ret = new Mat(height, width, 0.);
         for(var i = 0; i < height; i++) {
             for (var j = 0; j < width; j++) {
-                var idx = i*width + j;
+                var idx = j*height + i;
                 ret.set(i, j, vector[idx]);
             }
         }
@@ -65,7 +87,7 @@ class Mat{
         if (vector.length != n) {
             throw "Dimensions do not match!";
         }
-        ret = new Mat(n, n, 0.);
+        let ret = new Mat(n, n, 0.);
         for(var i = 0; i < n; i++) {
             ret.set(i, i, vector[i]);
         }
@@ -78,12 +100,13 @@ class Mat{
             throw "Dimensions do not match!";
         }
 
-        C = new Mat(A.h, B.w, 0.0);
+        let C = new Mat(A.h, B.w, 0.0);
         for(var i = 0; i < A.h; ++i) {
             for (var j = 0; j < B.w; ++j) {
                 C.set(i, j, A.elem(i, j) + B.elem(i, j));
             }
         }
+        return C;
     }
 
     static mat_mul(A, B) {
@@ -91,7 +114,7 @@ class Mat{
             throw "Dimensions do not match!";
         }
     
-        C = new Mat(A.h, B.w, 0.0);
+        let C = new Mat(A.h, B.w, 0.0);
     
         for(var i = 0; i < A.h; ++i) {
             for (var j = 0; j < B.w; ++j) {
