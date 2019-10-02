@@ -2,6 +2,31 @@
 
 let cursor;
 
+class Mat{
+    constructor(height, width, v=0.0) {
+        this.w = width;
+        this.h = height;
+        this._mat = [];
+        for(var i = 0; i < this.h; i++) {
+            this._mat[i] = [];
+            for(var j = 0; i < this.w; i++) {
+                this._mat[i][j] = v;            
+            }            
+        }
+    }
+
+    size() { 
+        return [this.h, this.w];
+    }
+
+    elem(i, j) {
+        if(i >= 0 && i < this.h && j >= 0 && j < this.w) {
+            return this._mat[i][j];
+        }
+    }
+}
+
+
 async function setup(state) {
     let libSources = await MREditor.loadAndRegisterShaderLibrariesForLiveEditing(gl, "libs", [
         { 
@@ -150,6 +175,10 @@ let inverse = src => {
   for (let n = 0 ; n <  4 ; n++) det += src[n] * dst[n << 2];
   for (let n = 0 ; n < 16 ; n++) dst[n] /= det;
   return dst;
+}
+
+function matmul(A, B) {
+
 }
 
 // NOTE: t is the elapsed time since system start in ms, but
