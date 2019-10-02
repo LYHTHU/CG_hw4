@@ -2,16 +2,31 @@
 
 let cursor;
 
+// I HAVE IMPLEMENTED inverse() FOR YOU. FOR HOMEWORK, YOU WILL STILL NEED TO IMPLEMENT:
+// identity(), translate(x,y,z), rotateX(a), rotateY(a) rotateZ(a), scale(x,y,z), multiply(A,B)
+
+let inverse = src => {
+    let dst = [], det = 0, cofactor = (c, r) => {
+       let s = (i, j) => src[c+i & 3 | (r+j & 3) << 2];
+       return (c+r & 1 ? -1 : 1) * ( (s(1,1) * (s(2,2) * s(3,3) - s(3,2) * s(2,3)))
+                                   - (s(2,1) * (s(1,2) * s(3,3) - s(3,2) * s(1,3)))
+                                   + (s(3,1) * (s(1,2) * s(2,3) - s(2,2) * s(1,3))) );
+    }
+    for (let n = 0 ; n < 16 ; n++) dst.push(cofactor(n >> 2, n & 3));
+    for (let n = 0 ; n <  4 ; n++) det += src[n] * dst[n << 2];
+    for (let n = 0 ; n < 16 ; n++) dst[n] /= det;
+    return dst;
+  }
+
+// I implement these method in class Mat
+
 class Mat{
     constructor(height, width, v=0.0) {
         this.w = width;
         this.h = height;
         this._mat = [];
-        for(var i = 0; i < this.h; i++) {
-            this._mat[i] = [];
-            for(var j = 0; j < this.w; j++) {
-                this._mat[i][j] = v;            
-            }            
+        for(var i = 0; i < this.h * this.w; i++) {
+            this._mat[i] = v;
         }
     }
 
@@ -21,13 +36,15 @@ class Mat{
 
     elem(i, j) {
         if(i >= 0 && i < this.h && j >= 0 && j < this.w) {
-            return this._mat[i][j];
+            var idx = j*this.h + i;
+            return this._mat[idx];
         }
     }
 
     set(i, j, v) { 
         if(i >= 0 && i < this.h && j >= 0 && j < this.w) {
-            this._mat[i][j] = v;
+            var idx = j*this.h + i;
+            this._mat[idx] = v;
         }
     }
 
@@ -49,7 +66,7 @@ class Mat{
         var str = "";
         for(var i = 0; i < this.h; i++) {
             for(var j = 0; j < this.w; j++) {
-                str = str + this._mat[i][j] + " ";       
+                str = str + this.elem(i, j) + " ";       
             }
             str += "\n";
         }
@@ -58,14 +75,7 @@ class Mat{
 
     // col by col
     toList() {
-        var ret = [];
-        for(var j = 0; j < this.w; j++) {
-            for (var i = 0; i < this.h; i++) {
-                var idx = j*this.h + i;
-                ret[idx] = this.elem(i, j);
-            }
-        }
-        return ret;
+        return this._mat;;
     }
 
     // col by col
@@ -74,12 +84,7 @@ class Mat{
             throw "Dimensions do not match!";
         }
         let ret = new Mat(height, width, 0.);
-        for(var i = 0; i < height; i++) {
-            for (var j = 0; j < width; j++) {
-                var idx = j*height + i;
-                ret.set(i, j, vector[idx]);
-            }
-        }
+        ret._mat = vector;
         return ret;
     }
 
@@ -109,7 +114,7 @@ class Mat{
         return C;
     }
 
-    static mat_mul(A, B) {
+    static multiply(A, B) {
         if(A.w != B.h) {
             throw "Dimensions do not match!";
         }
@@ -127,6 +132,68 @@ class Mat{
         }
         return C;
     }
+
+    inv() {
+        let ret = new Mat(A.h, A.w, 0.);
+        ret._mat = inverse(A._mat);
+        return ret;
+    }
+
+    static identity() {
+        return Mat.diag(4, [1, 1, 1, 1]);
+    }
+
+    static translate(x, y, z) {
+        let trans = mat.itentity();
+        trans.set(0, 3, x);
+        trans.set(1, 3, y);
+        trans.set(2, 3, z);
+        return trans;
+    }
+
+    static scale(x, y, z) {
+        return mat.diag(4, [x, y, z, 1]);
+    }
+
+    static perspective(x, y, z, w) {
+        let trans = mat.itentity();
+        trans.set(3, 0, x);
+        trans.set(3, 1, y);
+        trans.set(3, 2, z);
+        trans.set(3, 3, w);
+        return trans;
+    }
+
+    static rorateX(th) {
+        var c = Math.cos(th);
+        var s = Math.sin(th);
+
+        let trans = Mat.diag(4, [1, c, c, 1]);
+        trans.set(1, 2, -s);
+        trans.set(2, 1, s);
+        return trans;
+    }
+
+    static rorateY(th) {
+        var c = Math.cos(th);
+        var s = Math.sin(th);
+
+        let trans = Mat.diag(4, [c, 1, c, 1]);
+        trans.set(0, 2, s);
+        trans.set(2, 0, -s);
+        return trans;
+    }
+
+    static rorateZ(th) {
+        var c = Math.cos(th);
+        var s = Math.sin(th);
+
+        let trans = Mat.diag(4, [c, c, 1, 1]);
+        trans.set(0, 1, -s);
+        trans.set(1, 0, s);
+        return trans;
+    }
+
 }
 
 
@@ -264,25 +331,7 @@ async function setup(state) {
     gl.vertexAttribPointer(aPos, 3, gl.FLOAT, false, 0, 0);
 }
 
-// I HAVE IMPLEMENTED inverse() FOR YOU. FOR HOMEWORK, YOU WILL STILL NEED TO IMPLEMENT:
-// identity(), translate(x,y,z), rotateX(a), rotateY(a) rotateZ(a), scale(x,y,z), multiply(A,B)
 
-let inverse = src => {
-  let dst = [], det = 0, cofactor = (c, r) => {
-     let s = (i, j) => src[c+i & 3 | (r+j & 3) << 2];
-     return (c+r & 1 ? -1 : 1) * ( (s(1,1) * (s(2,2) * s(3,3) - s(3,2) * s(2,3)))
-                                 - (s(2,1) * (s(1,2) * s(3,3) - s(3,2) * s(1,3)))
-                                 + (s(3,1) * (s(1,2) * s(2,3) - s(2,2) * s(1,3))) );
-  }
-  for (let n = 0 ; n < 16 ; n++) dst.push(cofactor(n >> 2, n & 3));
-  for (let n = 0 ; n <  4 ; n++) det += src[n] * dst[n << 2];
-  for (let n = 0 ; n < 16 ; n++) dst[n] /= det;
-  return dst;
-}
-
-function matmul(A, B) {
-
-}
 
 // NOTE: t is the elapsed time since system start in ms, but
 // each world could have different rules about time elapsed and whether the time
