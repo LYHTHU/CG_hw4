@@ -134,8 +134,8 @@ class Mat{
     }
 
     inv() {
-        let ret = new Mat(A.h, A.w, 0.);
-        ret._mat = inverse(A._mat);
+        let ret = new Mat(this.h, this.w, 0.);
+        ret._mat = inverse(this._mat);
         return ret;
     }
 
@@ -416,14 +416,43 @@ function onStartFrame(t, state) {
     gl.uniform1i (state.uShapesLoc[2].type, 1);
     gl.uniform1i (state.uShapesLoc[2].n_p, 8);
 
-    gl.uniform4fv(state.uShapesLoc[2].planeLoc[0], [-r3,-r3,-r3,-r]);
-    gl.uniform4fv(state.uShapesLoc[2].planeLoc[1], [-r3,-r3,+r3,-r]);
-    gl.uniform4fv(state.uShapesLoc[2].planeLoc[2], [-r3,+r3,-r3,-r]);
-    gl.uniform4fv(state.uShapesLoc[2].planeLoc[3], [-r3,+r3,+r3,-r]);
-    gl.uniform4fv(state.uShapesLoc[2].planeLoc[4], [+r3,-r3,-r3,-r]);
-    gl.uniform4fv(state.uShapesLoc[2].planeLoc[5], [+r3,-r3,+r3,-r]);
-    gl.uniform4fv(state.uShapesLoc[2].planeLoc[6], [+r3,+r3,-r3,-r]);
-    gl.uniform4fv(state.uShapesLoc[2].planeLoc[7], [+r3,+r3,+r3,-r]);
+    var ry =  Mat.rotateY(time);
+    var rx =  Mat.rotateX(time);
+    var trans = Mat.multiply(rx, ry);
+    var inv_trans = trans.inv();
+    var tmp;
+
+    tmp = Mat.fromList(1, 4, [-r3,-r3,-r3,-r]);
+    tmp = Mat.multiply(tmp, inv_trans);
+    gl.uniform4fv(state.uShapesLoc[2].planeLoc[0], tmp.toList());
+
+    tmp = Mat.fromList(1, 4, [-r3,-r3,+r3,-r]);
+    tmp = Mat.multiply(tmp, inv_trans);
+    gl.uniform4fv(state.uShapesLoc[2].planeLoc[1], tmp.toList());
+
+    tmp = Mat.fromList(1, 4, [-r3,+r3,-r3,-r]);
+    tmp = Mat.multiply(tmp, inv_trans);
+    gl.uniform4fv(state.uShapesLoc[2].planeLoc[2], tmp.toList());
+
+    tmp = Mat.fromList(1, 4, [-r3,+r3,+r3,-r]);
+    tmp = Mat.multiply(tmp, inv_trans);
+    gl.uniform4fv(state.uShapesLoc[2].planeLoc[3], tmp.toList());
+
+    tmp = Mat.fromList(1, 4, [+r3,-r3,-r3,-r]);
+    tmp = Mat.multiply(tmp, inv_trans);
+    gl.uniform4fv(state.uShapesLoc[2].planeLoc[4], tmp.toList());
+
+    tmp = Mat.fromList(1, 4, [+r3,-r3,+r3,-r]);
+    tmp = Mat.multiply(tmp, inv_trans);
+    gl.uniform4fv(state.uShapesLoc[2].planeLoc[5], tmp.toList());
+
+    tmp = Mat.fromList(1, 4, [+r3,+r3,-r3,-r]);
+    tmp = Mat.multiply(tmp, inv_trans);
+    gl.uniform4fv(state.uShapesLoc[2].planeLoc[6], tmp.toList());
+
+    tmp = Mat.fromList(1, 4, [+r3,+r3,+r3,-r]);
+    tmp = Mat.multiply(tmp, inv_trans);
+    gl.uniform4fv(state.uShapesLoc[2].planeLoc[7], tmp.toList());
 
 
 
@@ -433,12 +462,36 @@ function onStartFrame(t, state) {
     gl.uniform1i (state.uShapesLoc[3].n_p, 6);
 
 
-    gl.uniform4fv(state.uShapesLoc[3].planeLoc[0], [1. , 0., 0., -r]);
-    gl.uniform4fv(state.uShapesLoc[3].planeLoc[1], [-1. , 0., 0., -r]);
-    gl.uniform4fv(state.uShapesLoc[3].planeLoc[2], [0. , 1., 0., -r]);
-    gl.uniform4fv(state.uShapesLoc[3].planeLoc[3], [0. , -1., 0., -r]);
-    gl.uniform4fv(state.uShapesLoc[3].planeLoc[4], [0. , 0., 1., -r]);
-    gl.uniform4fv(state.uShapesLoc[3].planeLoc[5], [0. , 0., -1., -r]);
+    // gl.uniform4fv(state.uShapesLoc[3].planeLoc[0], [1. , 0., 0., -r]);
+    // gl.uniform4fv(state.uShapesLoc[3].planeLoc[1], [-1. , 0., 0., -r]);
+    // gl.uniform4fv(state.uShapesLoc[3].planeLoc[2], [0. , 1., 0., -r]);
+    // gl.uniform4fv(state.uShapesLoc[3].planeLoc[3], [0. , -1., 0., -r]);
+    // gl.uniform4fv(state.uShapesLoc[3].planeLoc[4], [0. , 0., 1., -r]);
+    // gl.uniform4fv(state.uShapesLoc[3].planeLoc[5], [0. , 0., -1., -r]);
+
+    tmp = Mat.fromList(1, 4, [1. , 0., 0., -r]);
+    tmp = Mat.multiply(tmp, inv_trans);
+    gl.uniform4fv(state.uShapesLoc[3].planeLoc[0], tmp.toList());
+
+    tmp = Mat.fromList(1, 4, [-1. , 0., 0., -r]);
+    tmp = Mat.multiply(tmp, inv_trans);
+    gl.uniform4fv(state.uShapesLoc[3].planeLoc[1], tmp.toList());
+
+    tmp = Mat.fromList(1, 4, [0. , 1., 0., -r]);
+    tmp = Mat.multiply(tmp, inv_trans);
+    gl.uniform4fv(state.uShapesLoc[3].planeLoc[2], tmp.toList());
+
+    tmp = Mat.fromList(1, 4, [0. , -1., 0., -r]);
+    tmp = Mat.multiply(tmp, inv_trans);
+    gl.uniform4fv(state.uShapesLoc[3].planeLoc[3], tmp.toList());
+
+    tmp = Mat.fromList(1, 4, [0. , 0., 1., -r]);
+    tmp = Mat.multiply(tmp, inv_trans);
+    gl.uniform4fv(state.uShapesLoc[3].planeLoc[4], tmp.toList());
+
+    tmp = Mat.fromList(1, 4, [0. , 0., -1., -r]);
+    tmp = Mat.multiply(tmp, inv_trans);
+    gl.uniform4fv(state.uShapesLoc[3].planeLoc[5], tmp.toList());
 
 
     gl.uniform3fv(state.lightsLoc[0].src, [2.*Math.sin(time), 2.*Math.cos(time), -.5]);
