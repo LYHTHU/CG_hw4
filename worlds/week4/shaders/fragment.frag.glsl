@@ -90,56 +90,80 @@ vec4 intersect(Ray r,  Shape s){
                   sf[1][1]*vy*vy + sf[1][2]*vy*vz + sf[1][3]*vy + 
                   sf[2][2]*vz*vz + sf[2][3]*vz + sf[3][3];
 
-        float delta = B*B - 4.*A*C;
-        if (delta < 0.) {
-            continue;
-        }
-        else if (delta > 0.) {
-            float t1 = (-B - sqrt(delta)) / (2.*A), t2 = (-B + sqrt(delta)) / (2.*A);
-            float outside = dot(vec4(r.src, 1), vec4(r.src, 1) * transpose(sf));
-            // if outside
-            if (outside > 0.) {
-                if (t1 < 0.) {
-                    return vec4(10000., -10000., -1., -1.);
+        if (abs(A) > 1e-8) {
+
+            float delta = B*B - 4.*A*C;
+            if (delta < 0.) {
+                continue;
+            }
+            else if (delta > 0.) {
+                float t1 = (-B - sqrt(delta)) / (2.*A), t2 = (-B + sqrt(delta)) / (2.*A);
+                float outside = dot(vec4(r.src, 1), vec4(r.src, 1) * transpose(sf));
+
+                // if outside
+                if (outside > 0.) {
+                    if (t1 < 0.) {
+                        return vec4(10000., -10000., -1., -1.);
+                    }
+                    else {
+                        if (t1 > tmin) {
+                            tmin = t;
+                            idx1 = float(i);
+                        }
+                        if (t2 < tmax) {
+                            tmax = t;
+                            idx2 = float(i);
+                        }
+                    }
                 }
                 else {
-                    if (t1 > tmin) {
+                    if (t2 > 0. && t2 < tmax) {
+                        // tmax = t;
+                        // idx2 = float(i);
+                    }
+                }
+            }
+            else {
+                float t = -B / (2.*A);
+                // still need outside if-cond 
+                float outside = dot(vec4(r.src, 1), vec4(r.src, 1) * transpose(sf));
+                // if outside
+                if (outside > 0.) {
+                    if (t < 0.) {
+                        return vec4(10000., -10000., -1., -1.);
+                    }
+                    if (t > tmin) {
                         tmin = t;
                         idx1 = float(i);
                     }
-                    if (t2 < tmax) {
+                }
+                else {
+                    if (t < tmax) {
                         tmax = t;
                         idx2 = float(i);
-                    }
-                }
-            }
-            else {
-                if (t2 > 0. && t2 < tmax) {
-                    tmax = t;
-                    idx2 = float(i);
+                    }                
                 }
             }
         }
+        // A == 0.
         else {
-            float t = -B / (2.*A);
-            // still need outside if-cond 
             float outside = dot(vec4(r.src, 1), vec4(r.src, 1) * transpose(sf));
-            // if outside
+            float t = -C/B;
             if (outside > 0.) {
-                if (t < 0.) {
-                    return vec4(10000., -10000., -1., -1.);
+                    if (t < 0.) {
+                        return vec4(10000., -10000., -1., -1.);
+                    }
+                    if (t > tmin) {
+                        tmin = t;
+                        idx1 = float(i);
+                    }
                 }
-                if (t > tmin) {
-                    tmin = t;
-                    idx1 = float(i);
+                else {
+                    if (t < tmax) {
+                        tmax = t;
+                        idx2 = float(i);
+                    }                
                 }
-            }
-            else {
-                if (t < tmax) {
-                    tmax = t;
-                    idx2 = float(i);
-                }                
-            }
         }
     }
 
