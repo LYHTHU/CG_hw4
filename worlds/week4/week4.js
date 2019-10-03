@@ -418,7 +418,9 @@ function onStartFrame(t, state) {
 
     var ry =  Mat.rotateY(time);
     var rx =  Mat.rotateX(time);
+    var translate = Mat.translate(-1.*Math.sin(2.*time), -1.*Math.cos(2.*time), 1.);
     var trans = Mat.multiply(rx, ry);
+    trans = Mat.multiply(translate, trans);
     var inv_trans = trans.inv();
     var tmp;
 
@@ -461,13 +463,10 @@ function onStartFrame(t, state) {
     gl.uniform1i (state.uShapesLoc[3].type, 1);
     gl.uniform1i (state.uShapesLoc[3].n_p, 6);
 
-
-    // gl.uniform4fv(state.uShapesLoc[3].planeLoc[0], [1. , 0., 0., -r]);
-    // gl.uniform4fv(state.uShapesLoc[3].planeLoc[1], [-1. , 0., 0., -r]);
-    // gl.uniform4fv(state.uShapesLoc[3].planeLoc[2], [0. , 1., 0., -r]);
-    // gl.uniform4fv(state.uShapesLoc[3].planeLoc[3], [0. , -1., 0., -r]);
-    // gl.uniform4fv(state.uShapesLoc[3].planeLoc[4], [0. , 0., 1., -r]);
-    // gl.uniform4fv(state.uShapesLoc[3].planeLoc[5], [0. , 0., -1., -r]);
+    var translate = Mat.translate(0.6*Math.cos(time), 0., 0.6*Math.sin(time) + 0.6);
+    var trans = Mat.multiply(rx, ry);
+    trans = Mat.multiply(translate, trans);
+    var inv_trans = trans.inv();
 
     tmp = Mat.fromList(1, 4, [1. , 0., 0., -r]);
     tmp = Mat.multiply(tmp, inv_trans);

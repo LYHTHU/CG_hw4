@@ -79,8 +79,7 @@ vec3 get_normal(Shape s, vec3 pos, int idx){
 vec4 intersect(Ray r,  Shape s){
     float t;
     float idx = -1., idx2 = -1.; 
-    r.src = r.src - s.center;
-    s.center = vec3(0., 0., 0.);
+    // 
     switch(s.type)
     {
         case 0: 
