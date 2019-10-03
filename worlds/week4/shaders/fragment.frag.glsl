@@ -93,11 +93,13 @@ vec4 intersect(Ray r,  Shape s){
         if (abs(A) > 1e-8) {
 
             float delta = B*B - 4.*A*C;
+            
             if (delta < 0.) {
                 continue;
             }
             else if (delta > 0.) {
-                float t1 = (-B - sqrt(delta)) / (2.*A), t2 = (-B + sqrt(delta)) / (2.*A);
+                float r1 = (-B - sqrt(delta)) / (2.*A), r2 = (-B + sqrt(delta)) / (2.*A);
+                float t1 = min(r1, r2), t2 = max(r1, r2);
                 float outside = dot(vec4(r.src, 1), vec4(r.src, 1) * transpose(sf));
 
                 // if outside
@@ -107,19 +109,19 @@ vec4 intersect(Ray r,  Shape s){
                     }
                     else {
                         if (t1 > tmin) {
-                            tmin = t;
+                            tmin = t1;
                             idx1 = float(i);
                         }
                         if (t2 < tmax) {
-                            tmax = t;
+                            tmax = t2;
                             idx2 = float(i);
                         }
                     }
                 }
                 else {
                     if (t2 > 0. && t2 < tmax) {
-                        // tmax = t;
-                        // idx2 = float(i);
+                        tmax = t2;
+                        idx2 = float(i);
                     }
                 }
             }
