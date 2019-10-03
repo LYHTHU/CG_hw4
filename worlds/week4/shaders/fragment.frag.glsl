@@ -103,7 +103,7 @@ vec4 intersect(Ray r,  Shape s){
 
                 // if outside
                 if (outside > 0.) {
-                    if (t1 < 0.) {
+                    if (t1 < 0. && t2 < 0.) {
                         return vec4(10000., -10000., -1., -1.);
                     }
                     else {

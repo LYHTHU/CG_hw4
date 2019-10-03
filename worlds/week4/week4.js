@@ -376,7 +376,7 @@ function onStartFrame(t, state) {
 
     var translate = Mat.translate(1.0*Math.cos(2.*time), 1.0*Math.sin(2.*time), -3.*Math.sin(time));
     var trans = translate;
-    var inv_trans = translate.inv();
+    var inv_trans = trans.inv();
     var inv_trans_t = inv_trans.t();
 
     var tmp = Mat.fromList(4, 4, [1, 0, 0, 0, 
@@ -404,7 +404,7 @@ function onStartFrame(t, state) {
 
     var translate = Mat.translate(-.5, 1.2, -0.4);
     var trans = translate;
-    var inv_trans = translate.inv();
+    var inv_trans = trans.inv();
     var inv_trans_t = inv_trans.t();
 
     tmp = Mat.multiply(inv_trans_t, Mat.multiply(tmp, inv_trans));
