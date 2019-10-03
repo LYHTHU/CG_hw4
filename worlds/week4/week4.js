@@ -287,11 +287,9 @@ async function setup(state) {
                     state.uShapesLoc[i].r = gl.getUniformLocation(program, 'uShapes[' + i + '].r');
                     state.uShapesLoc[i].type = gl.getUniformLocation(program, 'uShapes[' + i + '].type');
                     state.uShapesLoc[i].n_p = gl.getUniformLocation(program, 'uShapes[' + i + '].n_p');
-                    state.uShapesLoc[i].planeLoc = []
                     state.uShapesLoc[i].surfLoc = []
                     for (var j = 0; j < 8; j++) {
                         state.uShapesLoc[i].surfLoc[j] = gl.getUniformLocation(program, 'uShapes[' + i + '].surf[' + j + ']');
-                        state.uShapesLoc[i].planeLoc[j] = gl.getUniformLocation(program, 'uShapes[' + i + '].plane[' + j + ']');
                     }
                 }
 
@@ -374,6 +372,20 @@ function onStartFrame(t, state) {
     gl.uniform3fv(state.uMaterialsLoc[0].transparent, [0.5,0.5,0.5]);
     gl.uniform1f (state.uMaterialsLoc[0].refraction   , 1.5);
 
+    gl.uniform1i (state.uShapesLoc[0].n_p, 1);
+
+    var translate = Mat.translate(1.0*Math.cos(2.*time), 1.0*Math.sin(2.*time), -3.*Math.sin(time));
+    var trans = translate;
+    var inv_trans = translate.inv();
+    var inv_trans_t = inv_trans.t();
+
+    var m0 = Mat.fromList(4, 4, [1, 0, 0, 0, 
+                                 0, 1, 0, 0, 
+                                 0, 0, 1, 0,
+                                 0, 0, 0, -0.6*0.6]);
+    m0 = Mat.multiply(inv_trans_t, Mat.multiply(trans, inv_trans));
+    gl.uniformMatrix4fv(state.uShapesLoc[0].surf[0], m0._mat);
+
     gl.uniform3fv(state.uMaterialsLoc[1].ambient , [0.0314, 0.098, 0.0]);
     gl.uniform3fv(state.uMaterialsLoc[1].diffuse , [0.05, 0.25, 0.0]);
     gl.uniform3fv(state.uMaterialsLoc[1].specular, [1.,1.,1.]);
@@ -382,6 +394,22 @@ function onStartFrame(t, state) {
     gl.uniform3fv(state.uMaterialsLoc[1].transparent, [0.5, 0.5, 0.5]);
     gl.uniform1f (state.uMaterialsLoc[1].refraction   , 1.5);
 
+    gl.uniform1i (state.uShapesLoc[1].n_p, 1);
+
+    var m1 = Mat.fromList(4, 4, [1, 0, 0, 0, 
+                                 0, 1, 0, 0, 
+                                 0, 0, 1, 0,
+                                 0, 0, 0, -0.7*0.7]);
+
+    var translate = Mat.translate(-.5, 1.2, -0.4);
+    var trans = translate;
+    var inv_trans = translate.inv();
+    var inv_trans_t = inv_trans.t();
+
+    m1 = Mat.multiply(inv_trans_t, Mat.multiply(trans, inv_trans));
+
+    gl.uniformMatrix4fv(state.uShapesLoc[1].surf[0], m1._mat);
+
     gl.uniform3fv(state.uMaterialsLoc[2].ambient , [.1,.1,0.]);
     gl.uniform3fv(state.uMaterialsLoc[2].diffuse , [.4,.1,0.3]);
     gl.uniform3fv(state.uMaterialsLoc[2].specular, [1.,1.,1.]);
@@ -389,24 +417,6 @@ function onStartFrame(t, state) {
     gl.uniform3fv(state.uMaterialsLoc[2].reflectc , [0.4, 0.4, 0.4]);
     gl.uniform3fv(state.uMaterialsLoc[2].transparent, [0.4, 0.4, 0.4]);
     gl.uniform1f (state.uMaterialsLoc[2].refraction   , 1.5);
-
-    gl.uniform3fv(state.uMaterialsLoc[3].ambient , [0.0, 0.25, 0.5]);
-    gl.uniform3fv(state.uMaterialsLoc[3].diffuse , [0.098, 0.2549, 0.4]);
-    gl.uniform3fv(state.uMaterialsLoc[3].specular, [1.,1.,1.]);
-    gl.uniform1f (state.uMaterialsLoc[3].power   , 20.);
-    gl.uniform3fv(state.uMaterialsLoc[3].reflectc , [0.4, 0.4, 0.4]);
-    gl.uniform3fv(state.uMaterialsLoc[3].transparent, [0.4, 0.4, 0.4]);
-    gl.uniform1f (state.uMaterialsLoc[3].refraction   , 2.0);
-
-    gl.uniform3fv(state.uShapesLoc[0].center, [1.0*Math.cos(2.*time), 1.0*Math.sin(2.*time), -3.*Math.sin(time)]);
-    gl.uniform1f (state.uShapesLoc[0].r, 0.6);
-    gl.uniform1i (state.uShapesLoc[0].type, 0);
-    gl.uniform1i (state.uShapesLoc[0].n_p, 0);
-
-    gl.uniform3fv(state.uShapesLoc[1].center, [-.5, 1.2, -0.4]);
-    gl.uniform1f (state.uShapesLoc[1].r, 0.7);
-    gl.uniform1i (state.uShapesLoc[1].type, 0);
-    gl.uniform1i (state.uShapesLoc[1].n_p, 0);
 
     var r3 = 1.0 / Math.sqrt(3);
     var r = 0.2;
@@ -418,79 +428,128 @@ function onStartFrame(t, state) {
 
     var ry =  Mat.rotateY(time);
     var rx =  Mat.rotateX(time);
+
     var translate = Mat.translate(-1.*Math.sin(2.*time), -1.*Math.cos(2.*time), 1.);
     var trans = Mat.multiply(rx, ry);
     trans = Mat.multiply(translate, trans);
     var inv_trans = trans.inv();
     var tmp;
 
-    tmp = Mat.fromList(1, 4, [-r3,-r3,-r3,-r]);
-    tmp = Mat.multiply(tmp, inv_trans);
-    gl.uniform4fv(state.uShapesLoc[2].planeLoc[0], tmp.toList());
+    tmp = Mat.fromList(4, 4, [0, 0, 0, -r3,
+                              0, 0, 0, -r3,
+                              0 ,0, 0, -r3,
+                              0, 0, 0, -r]);
+    tmp = Mat.multiply(inv_trans_t, Mat.multiply(tmp, inv_trans));
+    gl.uniformMatrix4fv(state.uShapesLoc[2].surfLoc[0], tmp.toList());
 
-    tmp = Mat.fromList(1, 4, [-r3,-r3,+r3,-r]);
-    tmp = Mat.multiply(tmp, inv_trans);
-    gl.uniform4fv(state.uShapesLoc[2].planeLoc[1], tmp.toList());
+    tmp = Mat.fromList(4, 4, [0, 0, 0, -r3,
+                              0, 0, 0, -r3,
+                              0 ,0, 0, +r3,
+                              0, 0, 0, -r]);
+    tmp = Mat.multiply(inv_trans_t, Mat.multiply(tmp, inv_trans));
+    gl.uniformMatrix4fv(state.uShapesLoc[2].surfLoc[1], tmp.toList());
 
-    tmp = Mat.fromList(1, 4, [-r3,+r3,-r3,-r]);
-    tmp = Mat.multiply(tmp, inv_trans);
-    gl.uniform4fv(state.uShapesLoc[2].planeLoc[2], tmp.toList());
+    tmp = Mat.fromList(4, 4, [0, 0, 0, -r3,
+                              0, 0, 0, +r3,
+                              0 ,0, 0, -r3,
+                              0, 0, 0, -r]);
 
-    tmp = Mat.fromList(1, 4, [-r3,+r3,+r3,-r]);
-    tmp = Mat.multiply(tmp, inv_trans);
-    gl.uniform4fv(state.uShapesLoc[2].planeLoc[3], tmp.toList());
+    tmp = Mat.multiply(inv_trans_t, Mat.multiply(tmp, inv_trans));
+    gl.uniformMatrix4fv(state.uShapesLoc[2].surfLoc[2], tmp.toList());
 
-    tmp = Mat.fromList(1, 4, [+r3,-r3,-r3,-r]);
-    tmp = Mat.multiply(tmp, inv_trans);
-    gl.uniform4fv(state.uShapesLoc[2].planeLoc[4], tmp.toList());
+    tmp = Mat.fromList(4, 4, [0, 0, 0, -r3,
+                              0, 0, 0, +r3,
+                              0 ,0, 0, +r3,
+                              0, 0, 0, -r]);
+    tmp = Mat.multiply(inv_trans_t, Mat.multiply(tmp, inv_trans));
+    gl.uniformMatrix4fv(state.uShapesLoc[2].surfLoc[3], tmp.toList());
 
-    tmp = Mat.fromList(1, 4, [+r3,-r3,+r3,-r]);
-    tmp = Mat.multiply(tmp, inv_trans);
-    gl.uniform4fv(state.uShapesLoc[2].planeLoc[5], tmp.toList());
+    tmp = Mat.fromList(4, 4, [0, 0, 0, +r3,
+                              0, 0, 0, -r3,
+                              0 ,0, 0, -r3,
+                              0, 0, 0, -r]);
+    tmp = Mat.multiply(inv_trans_t, Mat.multiply(tmp, inv_trans));
+    gl.uniformMatrix4fv(state.uShapesLoc[2].surfLoc[4], tmp.toList());
 
-    tmp = Mat.fromList(1, 4, [+r3,+r3,-r3,-r]);
-    tmp = Mat.multiply(tmp, inv_trans);
-    gl.uniform4fv(state.uShapesLoc[2].planeLoc[6], tmp.toList());
+    tmp = Mat.fromList(4, 4, [0, 0, 0, +r3,
+                              0, 0, 0, -r3,
+                              0 ,0, 0, +r3,
+                              0, 0, 0, -r]);
+    tmp = Mat.multiply(inv_trans_t, Mat.multiply(tmp, inv_trans));
+    gl.uniformMatrix4fv(state.uShapesLoc[2].surfLoc[5], tmp.toList());
 
-    tmp = Mat.fromList(1, 4, [+r3,+r3,+r3,-r]);
-    tmp = Mat.multiply(tmp, inv_trans);
-    gl.uniform4fv(state.uShapesLoc[2].planeLoc[7], tmp.toList());
+    tmp = Mat.fromList(4, 4, [0, 0, 0, +r3,
+                              0, 0, 0, +r3,
+                              0 ,0, 0, -r3,
+                              0, 0, 0, -r]);
+    tmp = Mat.multiply(inv_trans_t, Mat.multiply(tmp, inv_trans));
+    gl.uniformMatrix4fv(state.uShapesLoc[2].surfLoc[6], tmp.toList());
+
+    tmp = Mat.fromList(4, 4, [0, 0, 0, +r3,
+                              0, 0, 0, +r3,
+                              0 ,0, 0, +r3,
+                              0, 0, 0, -r]);
+    tmp = Mat.multiply(inv_trans_t, Mat.multiply(tmp, inv_trans));
+    gl.uniformMatrix4fv(state.uShapesLoc[2].surfLoc[7], tmp.toList());
 
 
+    gl.uniform3fv(state.uMaterialsLoc[3].ambient , [0.0, 0.25, 0.5]);
+    gl.uniform3fv(state.uMaterialsLoc[3].diffuse , [0.098, 0.2549, 0.4]);
+    gl.uniform3fv(state.uMaterialsLoc[3].specular, [1.,1.,1.]);
+    gl.uniform1f (state.uMaterialsLoc[3].power   , 20.);
+    gl.uniform3fv(state.uMaterialsLoc[3].reflectc , [0.4, 0.4, 0.4]);
+    gl.uniform3fv(state.uMaterialsLoc[3].transparent, [0.4, 0.4, 0.4]);
+    gl.uniform1f (state.uMaterialsLoc[3].refraction   , 2.0);
 
-    gl.uniform3fv(state.uShapesLoc[3].center, [0.6*Math.cos(time), 0., 0.6*Math.sin(time) + 0.6]);
     gl.uniform1f (state.uShapesLoc[3].r, 0.3);
-    gl.uniform1i (state.uShapesLoc[3].type, 1);
     gl.uniform1i (state.uShapesLoc[3].n_p, 6);
 
-    var translate = Mat.translate(0.6*Math.cos(time), 0., 0.6*Math.sin(time) + 0.6);
-    var trans = Mat.multiply(rx, ry);
+    translate = Mat.translate(0.6*Math.cos(time), 0., 0.6*Math.sin(time) + 0.6);
+    trans = Mat.multiply(rx, ry);
     trans = Mat.multiply(translate, trans);
-    var inv_trans = trans.inv();
+    inv_trans = trans.inv();
 
-    tmp = Mat.fromList(1, 4, [1. , 0., 0., -r]);
-    tmp = Mat.multiply(tmp, inv_trans);
-    gl.uniform4fv(state.uShapesLoc[3].planeLoc[0], tmp.toList());
+    tmp = Mat.fromList(4, 4, [0, 0, 0, +1,
+                              0, 0, 0, 0,
+                              0 ,0, 0, 0,
+                              0, 0, 0, -r])
+    tmp = Mat.multiply(inv_trans_t, Mat.multiply(tmp, inv_trans));
+    gl.uniformMatrix4fv(state.uShapesLoc[3].surfLoc[0], tmp.toList());
 
-    tmp = Mat.fromList(1, 4, [-1. , 0., 0., -r]);
-    tmp = Mat.multiply(tmp, inv_trans);
-    gl.uniform4fv(state.uShapesLoc[3].planeLoc[1], tmp.toList());
+    tmp = Mat.fromList(4, 4, [0, 0, 0, -1,
+                              0, 0, 0, 0,
+                              0 ,0, 0, 0,
+                              0, 0, 0, -r])
+    tmp = Mat.multiply(inv_trans_t, Mat.multiply(tmp, inv_trans));
+    gl.uniformMatrix4fv(state.uShapesLoc[3].surfLoc[1], tmp.toList());
 
-    tmp = Mat.fromList(1, 4, [0. , 1., 0., -r]);
+    tmp = Mat.fromList(4, 4, [0, 0, 0, 0,
+                              0, 0, 0, +1,
+                              0 ,0, 0, 0,
+                              0, 0, 0, -r])
     tmp = Mat.multiply(tmp, inv_trans);
     gl.uniform4fv(state.uShapesLoc[3].planeLoc[2], tmp.toList());
 
-    tmp = Mat.fromList(1, 4, [0. , -1., 0., -r]);
-    tmp = Mat.multiply(tmp, inv_trans);
-    gl.uniform4fv(state.uShapesLoc[3].planeLoc[3], tmp.toList());
+    tmp = Mat.fromList(4, 4, [0, 0, 0, 0,
+                              0, 0, 0, -1,
+                              0 ,0, 0, 0,
+                              0, 0, 0, -r])
+    tmp = Mat.multiply(inv_trans_t, Mat.multiply(tmp, inv_trans));
+    gl.uniformMatrix4fv(state.uShapesLoc[3].surfLoc[3], tmp.toList());
 
-    tmp = Mat.fromList(1, 4, [0. , 0., 1., -r]);
-    tmp = Mat.multiply(tmp, inv_trans);
-    gl.uniform4fv(state.uShapesLoc[3].planeLoc[4], tmp.toList());
+    tmp = Mat.fromList(4, 4, [0, 0, 0, 0,
+                              0, 0, 0, 0,
+                              0 ,0, 0, 1,
+                              0, 0, 0, -r])
+    tmp = Mat.multiply(inv_trans_t, Mat.multiply(tmp, inv_trans));
+    gl.uniformMatrix4fv(state.uShapesLoc[3].surfLoc[4], tmp.toList());
 
-    tmp = Mat.fromList(1, 4, [0. , 0., -1., -r]);
-    tmp = Mat.multiply(tmp, inv_trans);
-    gl.uniform4fv(state.uShapesLoc[3].planeLoc[5], tmp.toList());
+    tmp = Mat.fromList(4, 4, [0, 0, 0, 0,
+                              0, 0, 0, 0,
+                              0 ,0, 0, -1,
+                              0, 0, 0, -r])
+    tmp = Mat.multiply(inv_trans_t, Mat.multiply(tmp, inv_trans));
+    gl.uniformMatrix4fv(state.uShapesLoc[3].surfLoc[5], tmp.toList());
 
 
     gl.uniform3fv(state.lightsLoc[0].src, [2.*Math.sin(time), 2.*Math.cos(time), -.5]);
