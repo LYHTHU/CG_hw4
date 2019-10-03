@@ -13,7 +13,6 @@ uniform vec3 eye ;
 uniform vec3 screen_center; 
 
 struct Shape{
-    int type;
     vec3 center;
     float r;
     int n_p;
@@ -93,7 +92,7 @@ vec4 intersect(Ray r,  Shape s){
         if (abs(A) > 1e-8) {
 
             float delta = B*B - 4.*A*C;
-            
+
             if (delta < 0.) {
                 continue;
             }
