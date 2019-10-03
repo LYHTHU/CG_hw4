@@ -67,102 +67,118 @@ vec3 get_normal(Shape s, vec3 pos, int idx) {
                             2.*sf[2][2]*pos.z+sf[3][2] ) );
 }
 
+// return vec4(tmin, tmax, idx1, idx2)
+// idx1 => idx for tmin; idx2 => idx for tmax
+
 vec4 intersect(Ray r,  Shape s){
     float t;
-    float idx = -1., idx2 = -1.; 
-    // 
-    switch(s.type)
-    {
-        case 0: 
-            // Sphere
-            // d  =  direction of ray,  s  =  source of ray,  c  =  center of shape
-            vec3 c_s = s.center - r.src; 
-            float dc_s = dot(r.dir, c_s); 
-            float d2 = dot(r.dir, r.dir); // should be 1
-            float r2 = s.r*s.r; 
-            float delta = pow(dc_s, 2.) - d2*(dot(c_s, c_s) - r2); 
-            if(delta < 0.){
-                // no intersect
-                return vec4(-1., -2., idx, idx2); 
-            }
-            else if(delta > eps){
-                // two intersect
-                float t1 = (dc_s - sqrt(delta))/d2; 
-                float t2 = (dc_s + sqrt(delta))/d2; 
-                return vec4(t1, t2, idx, idx2);
-            }
-            else{
-                // one intersect
-                t = dc_s/d2; 
-                return vec4(t, t, idx, idx2); 
-            }
-            break;
-        default:
-        // All Polyhedron
-            // find the biggest t, when P*v > 0 at the begining
-            float t_min = -100000000., t_max = 100000000.0;
-            float p_src = 0., p_dir = 0.;
-            bool case1 = false;
-            for (int i = 0; i < s.n_p; i++) {
-                p_dir = dot(vec4(r.dir, 0.), s.plane[i]);
-                p_src = dot(vec4(r.src, 1.), s.plane[i]);
+    float idx1 = -1., idx2 = -1.; 
+    float tmin = -10000., tmax = 10000.;
+    float wx = r.dir.x, wy = r.dir.y, wz = r.dir.z; 
+    float vx = r.src.x, vy = r.src.y, vz = r.src.z; 
 
-                if (abs(p_dir) > 1.e-7) {
-                    if(p_src >= 0.) {
-                        t = -p_src / p_dir;
-                        if (t < 0.) case1 = true;
-                        if (t > 0. && t>t_min) {
-                            t_min = t;
-                            idx = float(i);
-                        }
+    for (int i = 0; i < s.n_p; i++) {
+        mat4 sf = s.surf[i];
+
+        float A = sf[0][0]*wx*wx + sf[1][0]*wx*wy + sf[2][0]*wx*wz + 
+                  sf[1][1]*wy*wy + sf[2][1]*wy*wz + 
+                  sf[2][2]*wz*wz;
+        float B = sf[0][0]*(vx*wx + vx*wx) + sf[1][0]*(vx*wy + vy*wx) + sf[2][0]*(vx*wz + vz*wx) + 
+                  sf[3][0]*wx + sf[1][1]*(vy*wy + vy*wy) + sf[2][1]*(vy*wz + vz*wy) + sf[3][1]*wy +
+                  sf[2][2]*(vz*wz + vz*wz) + sf[3][2]*wz;
+        float C = sf[0][0]*vx*vx + sf[1][0]*vx*vy + sf[2][0]*vx*vz + sf[3][0]*vx + 
+                  sf[1][1]*vy*vy + sf[2][1]*vy*vz + sf[3][1]*vy + 
+                  sf[2][2]*vz*vz + sf[3][2]*vz + sf[3][3];
+
+        float delta = B*B - 4.*A*C;
+        if (delta < 0.) {
+            continue;
+        }
+        else if (delta > 0.) {
+            float t1 = (-B - sqrt(delta)) / (2.*A), t2 = (-B + sqrt(delta)) / (2.*A);
+            float outside = ;
+            // if outside
+            if (outside > 0.) {
+                if (t1 < 0.) {
+                    return vec4(10000., -10000., -1., -1.);
+                }
+                else {
+                    if (t1 > tmin) {
+                        tmin = t;
+                        idx1 = i;
                     }
-                    else {
-                        // < 0
-                        t = -p_src / p_dir;
-                        if(t > 0. && t < t_max ){
-                            t_max = t;
-                            idx2 = float(i);
-                        }
+                    if (t2 < tmax) {
+                        tmax = t;
+                        idx2 = i;
                     }
                 }
             }
-            if (!case1)
-                return vec4(t_min, t_max, idx, idx2);
             else {
-                return vec4(-1., -2., -1., -1.);
-            }
-    }
-}
-
-bool inside(vec3 point, Shape s) {
-    switch (s.type) {
-        case 0:
-            return length(point - s.center) < s.r;
-        default:
-            for (int i = 0; i < s.n_p; i++) {
-                if (dot(s.plane[i], vec4(point, 1)) > 0.) {
-                    return false;
+                if (t2 > 0. && t2 < tmax) {
+                    tmax = t;
+                    idx2 = i;
                 }
             }
-            return true;
+        }
+        else {
+            float t = -B / (2*A);
+            // still need outside if-cond 
+            float outside = ;
+            // if outside
+            if (outside > 0.) {
+                if (t < 0.) {
+                    return vec4(10000., -10000., -1., -1.);
+                }
+                if (t > tmin) {
+                    tmin = t;
+                    idx1 = i;
+                }
+            }
+            else {
+                if (t < tmax) {
+                    tmax = t;
+                    idx2 = i;
+                }                
+            }
+        }
     }
+
+    if (idx1 < 0 && idx2 < 0) {
+        return vec4(10000., -10000., idx1, idx2);
+    }
+    return vec4(tmin, tmax, idx1, idx2);
+
 }
 
-bool hidden_by_shape(Light l){
-    Ray ray = get_ray(eye, l.src); 
-    for(int i = 0; i < NS; i++){
-        if(inside(l.src, uShapes[i])){
-            return true; 
-        }
+// bool inside(vec3 point, Shape s) {
+//     switch (s.type) {
+//         case 0:
+//             return length(point - s.center) < s.r;
+//         default:
+//             for (int i = 0; i < s.n_p; i++) {
+//                 if (dot(s.plane[i], vec4(point, 1)) > 0.) {
+//                     return false;
+//                 }
+//             }
+//             return true;
+//     }
+// }
+
+// bool hidden_by_shape(Light l){
+//     Ray ray = get_ray(eye, l.src); 
+//     for(int i = 0; i < NS; i++){
+//         if(inside(l.src, uShapes[i])){
+//             return true; 
+//         }
         
-        vec4 t = intersect(ray, uShapes[i]); 
-        if(t[1] > t[0] && t[0] > 0. && t[0] < length(l.src - eye)){
-            return true; 
-        }
+//         vec4 t = intersect(ray, uShapes[i]); 
+//         if(t[1] > t[0] && t[0] > 0. && t[0] < length(l.src - eye)){
+//             return true; 
+//         }
         
-    }
-    return false; 
-}
+//     }
+//     return false; 
+// }
 
 Ray reflect_ray(Ray rin, vec3 norm){
     Ray ret; 
@@ -249,14 +265,14 @@ vec3 phong(vec3 inter_point, int index, int idx_p) {
 vec3 ray_tracing(){
     vec3 color = vec3(0., 0., 0.); 
     Ray ray = get_ray(eye, screen_center + vec3(vPos.xy, 0)); 
-    for(int i = 0; i < NL; i++){
-        // show lights
-        if(dot(normalize(lights[i].src - ray.src), ray.dir) > .99999){
-            if(hidden_by_shape(lights[i])) continue; 
-            color = lights[i].rgb; 
-            return color; 
-        }
-    }
+    // for(int i = 0; i < NL; i++){
+    //     // show lights
+    //     if(dot(normalize(lights[i].src - ray.src), ray.dir) > .99999){
+    //         if(hidden_by_shape(lights[i])) continue; 
+    //         color = lights[i].rgb; 
+    //         return color; 
+    //     }
+    // }
     
     float t_min = 10000.; 
     int index =  -1; 
