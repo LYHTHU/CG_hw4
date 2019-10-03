@@ -62,9 +62,9 @@ void init(){
 
 vec3 get_normal(Shape s, vec3 pos, int idx) {
     mat4 sf = s.surf[idx];
-    return normalize( vec3( 2.*sf[0][0]*pos.x+sf[1][0]*pos.y+sf[2][0]*pos.z+sf[3][0],
-                            2.*sf[1][1]*pos.y+sf[2][1]*pos.z+sf[3][1],
-                            2.*sf[2][2]*pos.z+sf[3][2] ) );
+    return normalize( vec3( 2.*sf[0][0]*pos.x+sf[0][1]*pos.y+sf[0][2]*pos.z+sf[0][3],
+                            2.*sf[1][1]*pos.y+sf[1][2]*pos.z+sf[1][3],
+                            2.*sf[2][2]*pos.z+sf[2][3] ) );
 }
 
 // return vec4(tmin, tmax, idx1, idx2)
@@ -80,15 +80,15 @@ vec4 intersect(Ray r,  Shape s){
     for (int i = 0; i < s.n_p; i++) {
         mat4 sf = s.surf[i];
 
-        float A = sf[0][0]*wx*wx + sf[1][0]*wx*wy + sf[2][0]*wx*wz + 
-                  sf[1][1]*wy*wy + sf[2][1]*wy*wz + 
+        float A = sf[0][0]*wx*wx + sf[0][1]*wx*wy + sf[0][2]*wx*wz + 
+                  sf[1][1]*wy*wy + sf[1][2]*wy*wz + 
                   sf[2][2]*wz*wz;
-        float B = sf[0][0]*(vx*wx + vx*wx) + sf[1][0]*(vx*wy + vy*wx) + sf[2][0]*(vx*wz + vz*wx) + 
-                  sf[3][0]*wx + sf[1][1]*(vy*wy + vy*wy) + sf[2][1]*(vy*wz + vz*wy) + sf[3][1]*wy +
-                  sf[2][2]*(vz*wz + vz*wz) + sf[3][2]*wz;
-        float C = sf[0][0]*vx*vx + sf[1][0]*vx*vy + sf[2][0]*vx*vz + sf[3][0]*vx + 
-                  sf[1][1]*vy*vy + sf[2][1]*vy*vz + sf[3][1]*vy + 
-                  sf[2][2]*vz*vz + sf[3][2]*vz + sf[3][3];
+        float B = sf[0][0]*(vx*wx + vx*wx) + sf[0][1]*(vx*wy + vy*wx) + sf[0][2]*(vx*wz + vz*wx) + 
+                  sf[0][3]*wx + sf[1][1]*(vy*wy + vy*wy) + sf[1][2]*(vy*wz + vz*wy) + sf[1][3]*wy +
+                  sf[2][2]*(vz*wz + vz*wz) + sf[2][3]*wz;
+        float C = sf[0][0]*vx*vx + sf[0][1]*vx*vy + sf[0][2]*vx*vz + sf[0][3]*vx + 
+                  sf[1][1]*vy*vy + sf[1][2]*vy*vz + sf[1][3]*vy + 
+                  sf[2][2]*vz*vz + sf[2][3]*vz + sf[3][3];
 
         float delta = B*B - 4.*A*C;
         if (delta < 0.) {
@@ -96,7 +96,7 @@ vec4 intersect(Ray r,  Shape s){
         }
         else if (delta > 0.) {
             float t1 = (-B - sqrt(delta)) / (2.*A), t2 = (-B + sqrt(delta)) / (2.*A);
-            float outside = ;
+            float outside = dot(vec4(r.src, 1), vec4(r.src, 1) * transpose(sf));
             // if outside
             if (outside > 0.) {
                 if (t1 < 0.) {
@@ -105,25 +105,25 @@ vec4 intersect(Ray r,  Shape s){
                 else {
                     if (t1 > tmin) {
                         tmin = t;
-                        idx1 = i;
+                        idx1 = float(i);
                     }
                     if (t2 < tmax) {
                         tmax = t;
-                        idx2 = i;
+                        idx2 = float(i);
                     }
                 }
             }
             else {
                 if (t2 > 0. && t2 < tmax) {
                     tmax = t;
-                    idx2 = i;
+                    idx2 = float(i);
                 }
             }
         }
         else {
-            float t = -B / (2*A);
+            float t = -B / (2.*A);
             // still need outside if-cond 
-            float outside = ;
+            float outside = dot(vec4(r.src, 1), vec4(r.src, 1) * transpose(sf));
             // if outside
             if (outside > 0.) {
                 if (t < 0.) {
@@ -131,19 +131,19 @@ vec4 intersect(Ray r,  Shape s){
                 }
                 if (t > tmin) {
                     tmin = t;
-                    idx1 = i;
+                    idx1 = float(i);
                 }
             }
             else {
                 if (t < tmax) {
                     tmax = t;
-                    idx2 = i;
+                    idx2 = float(i);
                 }                
             }
         }
     }
 
-    if (idx1 < 0 && idx2 < 0) {
+    if (idx1 < 0. && idx2 < 0.) {
         return vec4(10000., -10000., idx1, idx2);
     }
     return vec4(tmin, tmax, idx1, idx2);
