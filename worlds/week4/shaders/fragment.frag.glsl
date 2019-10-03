@@ -60,20 +60,11 @@ Ray get_ray(vec3 p_src, vec3 p_dest){
 void init(){
 }
 
-vec3 get_normal(Shape s, vec3 pos, int idx){
-    switch(s.type) {
-        case 0: 
-        // Sphere
-            return normalize(pos-s.center);
-            break;
-        default:
-            // return normalize(pos-s.center);
-            if (idx > -1 && idx < s.n_p) {
-                return s.plane[idx].xyz;
-            }
-            break;
-    }
-
+vec3 get_normal(Shape s, vec3 pos, int idx) {
+    mat4 sf = s.surf[idx];
+    return normalize( vec3( 2.*sf[0][0]*pos.x+sf[1][0]*pos.y+sf[2][0]*pos.z+sf[3][0],
+                            2.*sf[1][1]*pos.y+sf[2][1]*pos.z+sf[3][1],
+                            2.*sf[2][2]*pos.z+sf[3][2] ) );
 }
 
 vec4 intersect(Ray r,  Shape s){
