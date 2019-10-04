@@ -16,7 +16,8 @@ struct Shape{
     // float r;
     int n_p;
     mat4 surf[8];
-    mat4 transform;
+    mat4 trans;
+    mat4 itrans;
 };
 
 
@@ -52,15 +53,14 @@ Ray get_ray(vec3 p_src, vec3 p_dest){
     return ret; 
 }
 
-// Setting the parameters of uShapes and lights
-void init(){
-}
 
 vec3 get_normal(Shape s, vec3 pos, int idx) {
     mat4 sf = s.surf[idx];
-    return normalize( vec3( 2.*sf[0][0]*pos.x+sf[0][1]*pos.y+sf[0][2]*pos.z+sf[0][3],
-                            2.*sf[1][1]*pos.y+sf[1][2]*pos.z+sf[1][3],
-                            2.*sf[2][2]*pos.z+sf[2][3] ) );
+    vec4 p = vec4(pos, 1) * transpose(s.itrans);
+    // vec4 p = vec4(pos, 1);
+    return normalize( vec3( 2.*sf[0][0]*p.x+sf[0][1]*p.y+sf[0][2]*p.z+sf[0][3],
+                            2.*sf[1][1]*p.y+sf[1][2]*p.z+sf[1][3],
+                            2.*sf[2][2]*p.z+sf[2][3] ) );
 }
 
 // return vec4(tmin, tmax, idx1, idx2)
@@ -69,8 +69,12 @@ vec3 get_normal(Shape s, vec3 pos, int idx) {
 vec4 intersect(Ray r,  Shape s){
     float idx1 = -1., idx2 = -1.; 
     float tmin = -10000., tmax = 10000.;
+
+    vec4 src = vec4(r.src, 1) * transpose(s.itrans);
+    // vec4 src = vec4(r.src, 1);
+
     float wx = r.dir.x, wy = r.dir.y, wz = r.dir.z; 
-    float vx = r.src.x, vy = r.src.y, vz = r.src.z; 
+    float vx = src[0], vy = src[1], vz = src[2]; 
 
     for (int i = 0; i < s.n_p; i++) {
         mat4 sf = s.surf[i];
@@ -95,7 +99,7 @@ vec4 intersect(Ray r,  Shape s){
             else if (delta > 0.) {
                 float r1 = (-B - sqrt(delta)) / (2.*A), r2 = (-B + sqrt(delta)) / (2.*A);
                 float t1 = min(r1, r2), t2 = max(r1, r2);
-                float outside = dot(vec4(r.src, 1), vec4(r.src, 1) * transpose(sf));
+                float outside = dot(src, src * transpose(sf));
 
                 // if outside
                 if (outside > 0.) {
@@ -123,7 +127,7 @@ vec4 intersect(Ray r,  Shape s){
             else {
                 float t = -B / (2.*A);
                 // still need outside if-cond 
-                float outside = dot(vec4(r.src, 1), vec4(r.src, 1) * transpose(sf));
+                float outside = dot(src, src * transpose(sf));
                 // if outside
                 if (outside > 0.) {
                     if (t < 0.) {
@@ -144,7 +148,7 @@ vec4 intersect(Ray r,  Shape s){
         }
         // A == 0.
         else {
-            float outside = dot(vec4(r.src, 1), vec4(r.src, 1) * transpose(sf));
+            float outside = dot(src, src * transpose(sf));
             float t = -C/B;
             if (outside > 0.) {
                     if (t < 0.) {
@@ -356,7 +360,6 @@ vec3 ray_tracing(){
         if(indexa > -1) {
             vec3 inter_point_a = ra.src + t_mina*ra.dir; 
             color += uMaterials[index].transparent * phong(inter_point_a, indexa, idx_pa);
-
         }
     }
     
