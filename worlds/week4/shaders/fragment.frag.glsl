@@ -13,12 +13,9 @@ uniform vec3 eye ;
 uniform vec3 screen_center; 
 
 struct Shape{
-    vec3 center;
-    float r;
+    // float r;
     int n_p;
-    vec4 plane[8];
     mat4 surf[8];
-
     mat4 transform;
 };
 
@@ -70,7 +67,6 @@ vec3 get_normal(Shape s, vec3 pos, int idx) {
 // idx1 => idx for tmin; idx2 => idx for tmax
 
 vec4 intersect(Ray r,  Shape s){
-    float t;
     float idx1 = -1., idx2 = -1.; 
     float tmin = -10000., tmax = 10000.;
     float wx = r.dir.x, wy = r.dir.y, wz = r.dir.z; 
@@ -89,7 +85,7 @@ vec4 intersect(Ray r,  Shape s){
                   sf[1][1]*vy*vy + sf[1][2]*vy*vz + sf[1][3]*vy + 
                   sf[2][2]*vz*vz + sf[2][3]*vz + sf[3][3];
 
-        if (abs(A) > 1e-8) {
+        if (abs(A) > 0.) {
 
             float delta = B*B - 4.*A*C;
 
@@ -107,11 +103,11 @@ vec4 intersect(Ray r,  Shape s){
                         return vec4(10000., -10000., -1., -1.);
                     }
                     else {
-                        if (t1 > tmin) {
+                        if (t1 > 0. && t1 > tmin) {
                             tmin = t1;
                             idx1 = float(i);
                         }
-                        if (t2 < tmax) {
+                        if (t2 > 0. && t2 < tmax) {
                             tmax = t2;
                             idx2 = float(i);
                         }
@@ -168,42 +164,25 @@ vec4 intersect(Ray r,  Shape s){
         }
     }
 
-    if (idx1 < 0. && idx2 < 0.) {
+    if (idx1 <= -1. && idx2 <= -1.) {
         return vec4(10000., -10000., idx1, idx2);
     }
     return vec4(tmin, tmax, idx1, idx2);
 
 }
 
-// bool inside(vec3 point, Shape s) {
-//     switch (s.type) {
-//         case 0:
-//             return length(point - s.center) < s.r;
-//         default:
-//             for (int i = 0; i < s.n_p; i++) {
-//                 if (dot(s.plane[i], vec4(point, 1)) > 0.) {
-//                     return false;
-//                 }
-//             }
-//             return true;
-//     }
-// }
-
-// bool hidden_by_shape(Light l){
-//     Ray ray = get_ray(eye, l.src); 
-//     for(int i = 0; i < NS; i++){
-//         if(inside(l.src, uShapes[i])){
-//             return true; 
-//         }
+bool hidden_by_shape(Light l){
+    Ray ray = get_ray(eye, l.src); 
+    for(int i = 0; i < NS; i++){
         
-//         vec4 t = intersect(ray, uShapes[i]); 
-//         if(t[1] > t[0] && t[0] > 0. && t[0] < length(l.src - eye)){
-//             return true; 
-//         }
+        vec4 t = intersect(ray, uShapes[i]); 
+        if(t[1] > t[0] && t[0] > 0. && t[0] < length(l.src - eye)){
+            return true; 
+        }
         
-//     }
-//     return false; 
-// }
+    }
+    return false; 
+}
 
 Ray reflect_ray(Ray rin, vec3 norm){
     Ray ret; 
@@ -290,14 +269,14 @@ vec3 phong(vec3 inter_point, int index, int idx_p) {
 vec3 ray_tracing(){
     vec3 color = vec3(0., 0., 0.); 
     Ray ray = get_ray(eye, screen_center + vec3(vPos.xy, 0)); 
-    // for(int i = 0; i < NL; i++){
-    //     // show lights
-    //     if(dot(normalize(lights[i].src - ray.src), ray.dir) > .99999){
-    //         if(hidden_by_shape(lights[i])) continue; 
-    //         color = lights[i].rgb; 
-    //         return color; 
-    //     }
-    // }
+    for(int i = 0; i < NL; i++){
+        // show lights
+        if(dot(normalize(lights[i].src - ray.src), ray.dir) > .99999){
+            if(hidden_by_shape(lights[i])) continue; 
+            color = lights[i].rgb; 
+            return color; 
+        }
+    }
     
     float t_min = 10000.; 
     int index =  -1; 
@@ -306,6 +285,7 @@ vec3 ray_tracing(){
     float tmp = 10001.;
     for(int i = 0; i < NS; i++){
         t = intersect(ray, uShapes[i]); 
+
         if (t[1] >= t[0]) {
             if(t[0] >= 0.){
                 tmp = t[0];
