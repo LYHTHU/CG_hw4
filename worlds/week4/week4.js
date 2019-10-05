@@ -382,8 +382,7 @@ function onStartFrame(t, state) {
     // S[3] => 1
 
     // 0, cyan ball
-    // let trans0 = Mat.translate(1.0*Math.cos(2.*time), 1.0*Math.sin(2.*time), -3.*Math.sin(time));
-    var trans0 = Mat.translate(1.0, 2.0, -3.);
+    let trans0 = Mat.translate(1.0*Math.cos(2.*time), 1.0*Math.sin(2.*time), -3.*Math.sin(time));
     var inv_trans0 = trans0.inv();
     gl.uniformMatrix4fv(state.uShapesLoc[0].transLoc, false, trans0.toList());
     gl.uniformMatrix4fv(state.uShapesLoc[0].itransLoc, false, inv_trans0.toList());
@@ -436,8 +435,7 @@ function onStartFrame(t, state) {
 
     // 2, oct
 
-    // let trans2 = Mat.translate(-1.*Math.sin(2.*time), -1.*Math.cos(2.*time), 1.);
-    var trans2 = Mat.translate(-1., -1., 1.);
+    let trans2 = Mat.translate(-1.*Math.sin(2.*time), -1.*Math.cos(2.*time), 1.);
     var inv_trans2 = trans2.inv();
 
     gl.uniform3fv(state.uMaterialsLoc[2].ambient , [.1,.1,0.]);
@@ -517,15 +515,13 @@ function onStartFrame(t, state) {
 
     // 3, cube
     var stretch = Mat.scale(Math.abs(Math.sin(time))+ 0.3, 0.8, 0.5);
-    // var t = Mat.multiply(Mat.rotateZ(2*time), Mat.rotateY(2*time));
-    var t = Mat.multiply(Mat.rotateZ(0), Mat.rotateY(0));
+    var t = Mat.multiply(Mat.rotateZ(2*time), Mat.rotateY(2*time));
 
     t = Mat.multiply(stretch, t);
     var it = t.inv();
     var it_t = it.t();
 
-    // let trans3 = Mat.translate(0.6*Math.cos(time), 0., 0.6*Math.sin(time) + 0.6);
-    var trans3 = Mat.translate(0., 0., 0.);
+    let trans3 = Mat.translate(0.6*Math.cos(time), 0., 0.6*Math.sin(time) + 0.6);
     var inv_trans3 = trans3.inv();
     gl.uniformMatrix4fv(state.uShapesLoc[3].transLoc, false, trans3.toList());
     gl.uniformMatrix4fv(state.uShapesLoc[3].itransLoc, false, inv_trans3.toList());

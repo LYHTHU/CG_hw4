@@ -155,13 +155,13 @@ vec4 intersect(Ray r,  Shape s){
                     if (t < 0.) {
                         return vec4(-1., -2., -1., -1.);
                     }
-                    if (t > tmin) {
+                    if (t > 0. && t > tmin) {
                         tmin = t;
                         idx1 = float(i);
                     }
                 }
                 else {
-                    if (t < tmax) {
+                    if (t > 0. && t < tmax) {
                         tmax = t;
                         idx2 = float(i);
                     }                
