@@ -282,7 +282,7 @@ async function setup(state) {
                 state.uMaterialsLoc = []
                 state.uShapesLoc = [];
 
-                for (var i = 0; i < 5; i++) {
+                for (var i = 0; i < 6; i++) {
                     state.uMaterialsLoc[i] = {};
                     state.uMaterialsLoc[i].diffuse  = gl.getUniformLocation(program, 'uMaterials[' + i + '].diffuse');
                     state.uMaterialsLoc[i].ambient  = gl.getUniformLocation(program, 'uMaterials[' + i + '].ambient');
@@ -387,11 +387,11 @@ function onStartFrame(t, state) {
     gl.uniformMatrix4fv(state.uShapesLoc[0].transLoc, false, trans0.toList());
     gl.uniformMatrix4fv(state.uShapesLoc[0].itransLoc, false, inv_trans0.toList());
 
-    gl.uniform3fv(state.uMaterialsLoc[0].ambient , [0.,.1,.1]);
-    gl.uniform3fv(state.uMaterialsLoc[0].diffuse , [0.,.5,.5]);
+    gl.uniform3fv(state.uMaterialsLoc[0].ambient , [0.05,0.05,0.05]);
+    gl.uniform3fv(state.uMaterialsLoc[0].diffuse , [0.01,0.01,0.01]);
     gl.uniform3fv(state.uMaterialsLoc[0].specular, [0.,1.,1.]);
     gl.uniform1f (state.uMaterialsLoc[0].power   , 20.);
-    gl.uniform3fv(state.uMaterialsLoc[0].reflectc , [0.5,0.5,0.5]);
+    gl.uniform3fv(state.uMaterialsLoc[0].reflectc , [1.0,1.0,1.0]);
     gl.uniform3fv(state.uMaterialsLoc[0].transparent, [0.5,0.5,0.5]);
     gl.uniform1f (state.uMaterialsLoc[0].refraction   , 1.5);
     gl.uniform1i (state.uShapesLoc[0].n_p, 1);
@@ -415,12 +415,12 @@ function onStartFrame(t, state) {
     gl.uniformMatrix4fv(state.uShapesLoc[1].transLoc, false, trans1.toList());
     gl.uniformMatrix4fv(state.uShapesLoc[1].itransLoc, false, inv_trans1.toList());
 
-    gl.uniform3fv(state.uMaterialsLoc[1].ambient , [0.0314, 0.098, 0.0]);
+    gl.uniform3fv(state.uMaterialsLoc[1].ambient , [0.03, 0.1, 0.0]);
     gl.uniform3fv(state.uMaterialsLoc[1].diffuse , [0.05, 0.25, 0.0]);
     gl.uniform3fv(state.uMaterialsLoc[1].specular, [1.,1.,1.]);
     gl.uniform1f (state.uMaterialsLoc[1].power   , 20.);
     gl.uniform3fv(state.uMaterialsLoc[1].reflectc , [0.5, 0.5, 0.5]);
-    gl.uniform3fv(state.uMaterialsLoc[1].transparent, [0.5, 0.5, 0.5]);
+    gl.uniform3fv(state.uMaterialsLoc[1].transparent, [1.0, 1.0, 1.0]);
     gl.uniform1f (state.uMaterialsLoc[1].refraction   , 1.5);
 
     gl.uniform1i (state.uShapesLoc[1].n_p, 1);
@@ -521,13 +521,13 @@ function onStartFrame(t, state) {
     var it = t.inv();
     var it_t = it.t();
 
-    let trans3 = Mat.translate(0.6*Math.cos(time), 0., 0.6*Math.sin(time) + 0.6);
+    let trans3 = Mat.translate(0.6*Math.cos(time), 0., 2.0*Math.sin(1.*time) );
     var inv_trans3 = trans3.inv();
     gl.uniformMatrix4fv(state.uShapesLoc[3].transLoc, false, trans3.toList());
     gl.uniformMatrix4fv(state.uShapesLoc[3].itransLoc, false, inv_trans3.toList());
 
     gl.uniform3fv(state.uMaterialsLoc[3].ambient , [0.0, 0.25, 0.5]);
-    gl.uniform3fv(state.uMaterialsLoc[3].diffuse , [0.098, 0.2549, 0.4]);
+    gl.uniform3fv(state.uMaterialsLoc[3].diffuse , [0.0, 0.025, 0.05]);
     gl.uniform3fv(state.uMaterialsLoc[3].specular, [1.,1.,1.]);
     gl.uniform1f (state.uMaterialsLoc[3].power   , 20.);
     gl.uniform3fv(state.uMaterialsLoc[3].reflectc , [0.4, 0.4, 0.4]);
@@ -585,14 +585,14 @@ function onStartFrame(t, state) {
     tmp = Mat.multiply(it_t, Mat.multiply(tmp, it) );
     gl.uniformMatrix4fv(state.uShapesLoc[3].surfLoc[5], false, tmp.toList());
 
-    // 4, cylinder shape(with bug)
+    // 4
     let trans4 = Mat.translate(Math.cos(time), Math.sin(time), Math.cos(time));
     let inv_trans4 = trans4.inv();
     gl.uniformMatrix4fv(state.uShapesLoc[4].transLoc, false, trans4.toList());
     gl.uniformMatrix4fv(state.uShapesLoc[4].itransLoc, false, inv_trans4.toList());
 
     gl.uniform3fv(state.uMaterialsLoc[4].ambient , [0.1, 0.1, 0.1]);
-    gl.uniform3fv(state.uMaterialsLoc[4].diffuse , [0.1, 0.1, 0.1]);
+    gl.uniform3fv(state.uMaterialsLoc[4].diffuse , [0.01, 0.01, 0.01]);
     gl.uniform3fv(state.uMaterialsLoc[4].specular, [1.,1.,1.]);
     gl.uniform1f (state.uMaterialsLoc[4].power   , 20.);
     gl.uniform3fv(state.uMaterialsLoc[4].reflectc , [1.0, 1.0, 1.0]);
@@ -630,6 +630,55 @@ function onStartFrame(t, state) {
     gl.uniform3fv(state.lightsLoc[1].rgb, [1., 1., 1.]);
 
     gl.uniform3fv(state.lightsLoc[2].src, [0., 1.*Math.cos(time), 1.*Math.sin(time)]);
+    gl.uniform3fv(state.lightsLoc[2].rgb, [1., 1., 1.]);
+
+
+    // 5
+    let trans5 = Mat.translate(Math.cos(time), Math.sin(2.*time), 1.*Math.sin(2.*time));
+    let inv_trans5 = trans5.inv();
+    gl.uniformMatrix4fv(state.uShapesLoc[5].transLoc, false, trans5.toList());
+    gl.uniformMatrix4fv(state.uShapesLoc[5].itransLoc, false, inv_trans5.toList());
+
+    gl.uniform3fv(state.uMaterialsLoc[5].ambient, [0.2, 0.0, 0.3]);
+    gl.uniform3fv(state.uMaterialsLoc[5].diffuse, [0.01, 0.01, 0.00]);
+    gl.uniform3fv(state.uMaterialsLoc[5].specular, [1., 1., 1.]);
+    gl.uniform1f(state.uMaterialsLoc[5].power, 20.);
+    gl.uniform3fv(state.uMaterialsLoc[5].reflectc, [0.3, 0.3, 0.3]);
+    gl.uniform3fv(state.uMaterialsLoc[5].transparent, [1.0, 1.0, 1.0]);
+    gl.uniform1f(state.uMaterialsLoc[5].refraction, 1.5);
+
+    gl.uniform1i(state.uShapesLoc[5].n_p, 3);
+
+    tmp = Mat.fromList(4, 4, [1., 0., 0., 0.,
+                              0., 1., 0., 0.,
+                              0., 0., 1., 0.,
+                              0., 0., 0., -.36]);
+    tmp = Mat.multiply(it_t, Mat.multiply(tmp, it));
+    gl.uniformMatrix4fv(state.uShapesLoc[5].surfLoc[0], false, tmp.toList());
+
+    tmp = Mat.fromList(4, 4, [0., 0., 0., 0.,
+                              0., 0., 0., 0.,
+                              0., 0., 0., 1.,
+                              0., 0., 0., 0.]);
+    tmp = Mat.multiply(it_t, Mat.multiply(tmp, it));
+    gl.uniformMatrix4fv(state.uShapesLoc[5].surfLoc[1], false, tmp.toList());
+
+    tmp = Mat.fromList(4, 4, [0., 0., 0., 1.,
+                              0., 0., 0., 0.,
+                              0., 0., 0., 1.,
+                              0., 0., 0., 0]);
+    tmp = Mat.multiply(it_t, Mat.multiply(tmp, it));
+    gl.uniformMatrix4fv(state.uShapesLoc[5].surfLoc[1], false, tmp.toList());
+
+    // Lights
+
+    gl.uniform3fv(state.lightsLoc[0].src, [2. * Math.sin(time), 2. * Math.cos(time), -.5]);
+    gl.uniform3fv(state.lightsLoc[0].rgb, [1., 1., 1.]);
+
+    gl.uniform3fv(state.lightsLoc[1].src, [-1.5 * Math.cos(time), 0., 1.5 * Math.sin(time)]);
+    gl.uniform3fv(state.lightsLoc[1].rgb, [1., 1., 1.]);
+
+    gl.uniform3fv(state.lightsLoc[2].src, [0., 1. * Math.cos(time), 1. * Math.sin(time)]);
     gl.uniform3fv(state.lightsLoc[2].rgb, [1., 1., 1.]);
 
     gl.enable(gl.DEPTH_TEST);
