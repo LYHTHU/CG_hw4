@@ -6,7 +6,7 @@ uniform float uTime;   // TIME, IN SECONDS
 in vec3 vPos;          // POSITION IN IMAGE
 out vec4 fragColor;    // RESULT WILL GO HERE
 
-const int NS = 4; // Number of uShapes in the scene
+const int NS = 5; // Number of uShapes in the scene
 const int NL = 3; // Number of light sources in the scene
 const float eps = 1.e-7; 
 uniform vec3 eye ; 
@@ -94,7 +94,7 @@ vec4 intersect(Ray r,  Shape s){
             float delta = B*B - 4.*A*C;
 
             if (delta < 0.) {
-                continue;
+                return vec4 (-1., -2. , -1., -1.);
             }
             else if (delta > 0.) {
                 float r1 = (-B - sqrt(delta)) / (2.*A), r2 = (-B + sqrt(delta)) / (2.*A);

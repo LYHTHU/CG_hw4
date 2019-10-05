@@ -586,21 +586,20 @@ function onStartFrame(t, state) {
     gl.uniformMatrix4fv(state.uShapesLoc[3].surfLoc[5], false, tmp.toList());
 
     // 4, cylinder shape(with bug)
-    let trans4 = Mat.identity();
+    let trans4 = Mat.translate(Math.cos(time), Math.sin(time), Math.cos(time));
     let inv_trans4 = trans4.inv();
     gl.uniformMatrix4fv(state.uShapesLoc[4].transLoc, false, trans4.toList());
     gl.uniformMatrix4fv(state.uShapesLoc[4].itransLoc, false, inv_trans4.toList());
 
-    gl.uniform3fv(state.uMaterialsLoc[4].ambient , [0.0314, 0.098, 0.0]);
-    gl.uniform3fv(state.uMaterialsLoc[4].diffuse , [0.05, 0.25, 0.0]);
+    gl.uniform3fv(state.uMaterialsLoc[4].ambient , [0.1, 0.1, 0.1]);
+    gl.uniform3fv(state.uMaterialsLoc[4].diffuse , [0.1, 0.1, 0.1]);
     gl.uniform3fv(state.uMaterialsLoc[4].specular, [1.,1.,1.]);
     gl.uniform1f (state.uMaterialsLoc[4].power   , 20.);
-    gl.uniform3fv(state.uMaterialsLoc[4].reflectc , [0.5, 0.5, 0.5]);
-    gl.uniform3fv(state.uMaterialsLoc[4].transparent, [0.5, 0.5, 0.5]);
+    gl.uniform3fv(state.uMaterialsLoc[4].reflectc , [1.0, 1.0, 1.0]);
+    gl.uniform3fv(state.uMaterialsLoc[4].transparent, [1.0, 1.0, 1.0]);
     gl.uniform1f (state.uMaterialsLoc[4].refraction   , 1.5);
 
     gl.uniform1i (state.uShapesLoc[4].n_p, 3);
-    
 
     tmp = Mat.fromList(4, 4, [1., 0., 0., 0., 
                               0., 1., 0., 0., 
