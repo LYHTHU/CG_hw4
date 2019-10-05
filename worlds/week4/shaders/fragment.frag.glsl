@@ -89,7 +89,7 @@ vec4 intersect(Ray r,  Shape s){
                   sf[1][1]*vy*vy + sf[1][2]*vy*vz + sf[1][3]*vy + 
                   sf[2][2]*vz*vz + sf[2][3]*vz + sf[3][3];
 
-        if (abs(A) > 0.) {
+        if (abs(A) > 1.e-7) {
 
             float delta = B*B - 4.*A*C;
 
@@ -148,11 +148,12 @@ vec4 intersect(Ray r,  Shape s){
         }
         // A == 0.
         else {
+            if(B==0.) continue;
             float outside = dot(src, src * transpose(sf));
             float t = -C/B;
-            if (outside > 0.) {
+            if (outside > 1.e-7) {
                     if (t < 0.) {
-                        return vec4(10000., -10000., -1., -1.);
+                        return vec4(-1., -2., -1., -1.);
                     }
                     if (t > tmin) {
                         tmin = t;
