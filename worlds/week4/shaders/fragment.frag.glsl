@@ -6,7 +6,7 @@ uniform float uTime;   // TIME, IN SECONDS
 in vec3 vPos;          // POSITION IN IMAGE
 out vec4 fragColor;    // RESULT WILL GO HERE
 
-const int NS = 6; // Number of uShapes in the scene
+const int NS = 7; // Number of uShapes in the scene
 const int NL = 3; // Number of light sources in the scene
 const float eps = 1.e-7; 
 uniform vec3 eye ; 
