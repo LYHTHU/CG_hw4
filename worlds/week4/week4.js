@@ -411,7 +411,7 @@ function onStartFrame(t, state) {
 
 
     // 1, green ball
-    let trans1 = Mat.translate(-1.0, 1.2, -0.4);
+    let trans1 = Mat.translate(-1.0, 1.2, -0.8);
     let inv_trans1 = trans1.inv();
     gl.uniformMatrix4fv(state.uShapesLoc[1].transLoc, false, trans1.toList());
     gl.uniformMatrix4fv(state.uShapesLoc[1].itransLoc, false, inv_trans1.toList());
@@ -427,8 +427,9 @@ function onStartFrame(t, state) {
     gl.uniform1i (state.uShapesLoc[1].n_p, 1);
     
     var rotate = Mat.multiply(Mat.rotateX(time), Mat.rotateY(time));
-    var stretch = Mat.scale(Math.abs(Math.cos(2 * time)) + 0.5, Math.abs(Math.cos(time)) + 0.5, 2. * Math.abs(Math.sin(time)) + 0.5);
-    var it = Mat.multiply(rotate, stretch).inv();
+    var stretch = Mat.scale(Math.abs(Math.cos(2 * time)) + 0.3, Math.abs(Math.cos(time)) + 0.5, Math.abs(Math.sin(time)) + 0.5);
+    var pers = Mat.perspective(-0.8, -0.5, 0., 1.);
+    var it = Mat.multiply(pers, Mat.multiply(rotate, stretch)).inv();
     var it_t = it.t();
     tmp = Mat.fromList(4, 4, [1., 0., 0., 0., 
                               0., 1., 0., 0., 

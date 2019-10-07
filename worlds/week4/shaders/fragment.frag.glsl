@@ -13,10 +13,10 @@ uniform vec3 eye ;
 uniform vec3 screen_center; 
 
 ////////////////////////////////////////////////////////
-// Notice: Please use Win 10 or MacOS to grade. It    //
-// will encounter some platform-based error in        //
-// Ubuntu 18.04. I raised a question on Piazza.       //
-// Thanks.                                            //
+// Notice: Please use Win 10 or MacOS to grade. It    
+// will encounter some platform-based error in        
+// Ubuntu 18.04. I raised a question on Piazza.       
+// Thanks.                                            
 ////////////////////////////////////////////////////////
 
 struct Shape{
